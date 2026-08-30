@@ -4,6 +4,8 @@ from urllib.parse import unquote
 import requests
 from dotenv import load_dotenv
 
+from app.normalizer import normalize_drive
+
 load_dotenv()
 
 REFRESH_URL = "https://api.neopat.ai/api/v1/auth/tokens/refresh/student"
@@ -147,14 +149,14 @@ def get_all_drives(access_token, limit=12):
 
 if __name__ == "__main__":
     access_token = refresh_access_token()
-
     drives = get_all_drives(access_token)
 
-    print(f"Total drives: {len(drives)}")
+    normalized_drives = [
+        normalize_drive(drive)
+        for drive in drives
+    ]
 
-    for drive in drives:
-        print(
-            drive["company_name"],
-            "|",
-            drive["lastDate"],
-        )
+    print(f"Total drives: {len(normalized_drives)}")
+
+    for drive in normalized_drives:
+        print(drive)
