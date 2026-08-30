@@ -124,16 +124,33 @@ def get_drives(access_token, page=1, limit=12):
 
     return response.json()
 
+def get_all_drives(access_token, limit=12):
+    page = 1
+    all_drives = []
+
+    while True:
+        data = get_drives(access_token, page=page, limit=limit)
+
+        drives = data["data"]["data"]
+        total = data["data"]["count"]
+
+        all_drives.extend(drives)
+
+        print(f"Fetched page {page}: {len(drives)} drives")
+
+        if len(all_drives) >= total or not drives:
+            break
+
+        page += 1
+
+    return all_drives
+
 if __name__ == "__main__":
     access_token = refresh_access_token()
 
-    data = get_drives(access_token)
+    drives = get_all_drives(access_token)
 
-    drives = data["data"]["data"]
-    total = data["data"]["count"]
-
-    print(f"Total drives: {total}")
-    print(f"Fetched: {len(drives)}")
+    print(f"Total drives: {len(drives)}")
 
     for drive in drives:
         print(
