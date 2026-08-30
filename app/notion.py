@@ -2,8 +2,6 @@ import os
 
 from dotenv import load_dotenv
 from notion_client import Client
-from app.normalizer import normalize_drive
-from app.neopat import get_all_drives, refresh_access_token
 
 load_dotenv()
 
@@ -25,19 +23,6 @@ notion = Client(
     auth=NOTION_TOKEN,
     notion_version="2026-03-11",
 )
-
-
-def get_database():
-    return notion.databases.retrieve(
-        database_id=NOTION_DATABASE_ID
-    )
-
-
-def get_data_source(data_source_id):
-    return notion.request(
-        path=f"/data_sources/{data_source_id}",
-        method="GET",
-    )
 
 
 def build_placement_properties(placement):
@@ -78,13 +63,20 @@ def build_placement_properties(placement):
 
 
 def create_placement(placement):
-    properties = build_placement_properties(placement)
-
     response = notion.pages.create(
         parent={
             "data_source_id": NOTION_DATA_SOURCE_ID
         },
-        properties=properties,
+        properties=build_placement_properties(placement),
+    )
+
+    return response
+
+
+def update_placement(page_id, placement):
+    response = notion.pages.update(
+        page_id=page_id,
+        properties=build_placement_properties(placement),
     )
 
     return response
@@ -108,49 +100,20 @@ def find_placement_by_neopat_id(neopat_id):
 
     return results[0]
 
-def update_placement(page_id, placement):
-    properties = build_placement_properties(placement)
 
-    response = notion.pages.update(
-        page_id=page_id,
-        properties=properties,
-    )
-
-    return response
-
-if __name__ == "__main__":
-    access_token = refresh_access_token()
-    drives = get_all_drives(access_token)
-
-    groww = next(
-        drive
-        for drive in drives
-        if drive.get("company_name") == "Groww"
-    )
-
-    placement = normalize_drive(groww)
-
-    print("Normalized placement:")
-    print(placement)
-
-    result = find_placement_by_neopat_id(
+def sync_placement(placement):
+    existing = find_placement_by_neopat_id(
         placement["drive_id"]
     )
 
-    if result:
-        print("Placement already exists:")
-        print(result["id"])
-
-        updated = update_placement(
-            result["id"],
+    if existing:
+        update_placement(
+            existing["id"],
             placement,
         )
 
-        print("Updated Notion page:")
-        print(updated["id"])
+        return "updated"
 
-    else:
-        created = create_placement(placement)
+    create_placement(placement)
 
-        print("Created Notion page:")
-        print(created["id"])
+    return "created"
