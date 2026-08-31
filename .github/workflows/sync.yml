@@ -3,7 +3,7 @@ name: NeoPAT Placement Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "40 12 * * *"
+    - cron: "*/5 * * * *"
 
 jobs:
   sync:
