@@ -13,13 +13,13 @@ jobs:
 
       - name: Check Python
         run: |
-          & "C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\python.exe" --version
-          & "C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\python.exe" -m pip --version
+          python --version
+          python -m pip --version
 
       - name: Install dependencies
         run: |
-          & "C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\python.exe" -m pip install --upgrade pip
-          & "C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\python.exe" -m pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
       - name: Run placement sync
         env:
@@ -28,4 +28,4 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_DATA_SOURCE_ID: ${{ secrets.NOTION_DATA_SOURCE_ID }}
         run: |
-          & "C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\python.exe" -m app.sync
+          python -m app.sync
